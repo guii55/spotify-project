@@ -62,6 +62,7 @@ func (s *Store) Update(t track.Track) (track.Track, error) {
 	s.m[t.ID] = t
 	return t, nil
 }
+
 func (s *Store) Delete(id int64) error {
 	_, exists := s.m[id]
 	if !exists {
