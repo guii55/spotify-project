@@ -3,12 +3,14 @@ package memory
 import (
 	"fmt"
 	"sort"
+	"sync"
 
 	"github.com/guii55/music-library/internal/track"
 )
 
 type Store struct {
 	m      map[int64]track.Track
+	mu     sync.RWMutex
 	nextID int64
 }
 
@@ -21,6 +23,8 @@ func NewStore() *Store {
 }
 
 func (s *Store) Create(t track.Track) (track.Track, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	err := t.Validate()
 	if err != nil {
 		return track.Track{}, fmt.Errorf("create: %w", err)
@@ -32,6 +36,8 @@ func (s *Store) Create(t track.Track) (track.Track, error) {
 }
 
 func (s *Store) Get(id int64) (track.Track, error) {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	t, exists := s.m[id]
 	if !exists {
 		return track.Track{}, fmt.Errorf("get: %w: %d", track.ErrNotFound, id)
@@ -40,6 +46,8 @@ func (s *Store) Get(id int64) (track.Track, error) {
 }
 
 func (s *Store) List() []track.Track {
+	s.mu.RLock()
+	defer s.mu.RUnlock()
 	tracks := make([]track.Track, 0, len(s.m))
 	for _, t := range s.m {
 		tracks = append(tracks, t)
@@ -51,6 +59,8 @@ func (s *Store) List() []track.Track {
 }
 
 func (s *Store) Update(t track.Track) (track.Track, error) {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	err := t.Validate()
 	if err != nil {
 		return track.Track{}, fmt.Errorf("update: %w", err)
@@ -64,6 +74,8 @@ func (s *Store) Update(t track.Track) (track.Track, error) {
 }
 
 func (s *Store) Delete(id int64) error {
+	s.mu.Lock()
+	defer s.mu.Unlock()
 	_, exists := s.m[id]
 	if !exists {
 		return fmt.Errorf("delete: %w: %d", track.ErrNotFound, id)
