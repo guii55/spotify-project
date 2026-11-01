@@ -40,6 +40,15 @@ func TestCreate(t *testing.T) {
 		t.Errorf("segundo ID = %d, esperado 2", second.ID)
 	}
 }
+func TestCreateInvalidTrack(t *testing.T) {
+	s := NewStore()
+
+	_, err := s.Create(track.Track{})
+	if !errors.Is(err, track.ErrInvalid) {
+		t.Fatalf("Create: erro = %v, esperado ErrInvalid", err)
+	}
+
+}
 
 func TestGet(t *testing.T) {
 	s := NewStore()
@@ -54,6 +63,16 @@ func TestGet(t *testing.T) {
 	if created.ID != tr.ID {
 		t.Errorf("Get: ID = %d, esperado %d", created.ID, tr.ID)
 	}
+}
+
+func TestGetNotFound(t *testing.T) {
+	s := NewStore()
+
+	_, err := s.Get(999)
+	if !errors.Is(err, track.ErrNotFound) {
+		t.Fatalf("Get: erro = %v, esperado ErrInvalid", err)
+	}
+
 }
 
 func TestList(t *testing.T) {
@@ -80,7 +99,10 @@ func TestList(t *testing.T) {
 
 func TestUpdate(t *testing.T) {
 	s := NewStore()
-	tr, _ := s.Create(validTrack(t))
+	tr, erro := s.Create(validTrack(t))
+	if erro != nil {
+		t.Fatalf("Create: erro inesperado: %v", erro)
+	}
 	tr.Title = "Updated Title"
 	_, err := s.Update(tr)
 	if err != nil {
@@ -92,6 +114,20 @@ func TestUpdate(t *testing.T) {
 	}
 
 }
+
+func TestUpdateNotFound(t *testing.T) {
+
+	s := NewStore()
+	tr := validTrack(t)
+	tr.ID = -1
+
+	_, err := s.Update(tr)
+	if !errors.Is(err, track.ErrNotFound) {
+		t.Fatalf("Update: erro = %v, esperado ErrNotFound", err)
+	}
+
+}
+
 func TestDelete(t *testing.T) {
 	s := NewStore()
 	tr, err := s.Create(validTrack(t))
@@ -106,4 +142,14 @@ func TestDelete(t *testing.T) {
 	if !errors.Is(err, track.ErrNotFound) {
 		t.Fatalf("Get após Delete: erro = %v, esperado ErrNotFound", err)
 	}
+}
+
+func TestDeleteNotFound(t *testing.T) {
+
+	s := NewStore()
+	err := s.Delete(-1)
+	if !errors.Is(err, track.ErrNotFound) {
+		t.Fatalf("Delete: erro = %v, esperado ErrNotFound", err)
+	}
+
 }
