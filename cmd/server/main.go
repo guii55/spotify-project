@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"net/http"
+	"os"
 	"time"
 
 	"github.com/guii55/music-library/internal/httpapi"
@@ -12,11 +13,15 @@ import (
 func main() {
 	store := memory.NewStore()
 	srv := httpapi.NewServer(store)
+	port := os.Getenv("PORT")
+	if port == "" {
+		port = "8080"
+	}
 
 	server := &http.Server{
-		Addr:        ":8080",
-		Handler:     srv.Handler(),
-		ReadTimeout: 5 * time.Second,
+		Addr:              ":" + port,
+		Handler:           srv.Handler(),
+		ReadHeaderTimeout: 5 * time.Second,
 	}
 	log.Fatal(server.ListenAndServe())
 }

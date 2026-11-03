@@ -33,6 +33,11 @@ func (s *Server) HandlerHealth(w http.ResponseWriter, r *http.Request) {
 	w.Write([]byte(`{"status":"ok"}`))
 }
 
+func parseID(r *http.Request) (int64, error) {
+	id := r.PathValue("id")
+	return strconv.ParseInt(id, 10, 64)
+}
+
 func (s *Server) HandlerCreateTrack(w http.ResponseWriter, r *http.Request) {
 
 	t := track.Track{}
@@ -57,7 +62,7 @@ func (s *Server) HandlerListTracks(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) HandlerGetTrack(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	id, err := parseID(r)
 
 	if err != nil {
 		WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid track ID"})
@@ -74,7 +79,8 @@ func (s *Server) HandlerGetTrack(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) HandlerUpdateTrack(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	id, err := parseID(r)
+
 	if err != nil {
 		WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid track ID"})
 		return
@@ -96,7 +102,8 @@ func (s *Server) HandlerUpdateTrack(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) HandlerDeleteTrack(w http.ResponseWriter, r *http.Request) {
-	id, err := strconv.ParseInt(r.PathValue("id"), 10, 64)
+	id, err := parseID(r)
+
 	if err != nil {
 		WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid track ID"})
 		return
