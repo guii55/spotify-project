@@ -4,8 +4,6 @@ import (
 	"errors"
 	"testing"
 	"time"
-
-	"github.com/guii55/music-library/internal/track"
 )
 
 type validateCase struct {
@@ -37,14 +35,4 @@ func TestValidate(t *testing.T) {
 	}
 
 	loop(t, tests)
-}
-
-func TestCreateInvalidTrack(t *testing.T) {
-	s := NewStore()
-
-	_, err := s.Create(track.Track{})
-	if !errors.Is(err, track.ErrInvalid) {
-		t.Fatal("Create: erro = %v, esperado ErrInvalid", err)
-	}
-
 }

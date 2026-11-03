@@ -70,7 +70,7 @@ func TestGetNotFound(t *testing.T) {
 
 	_, err := s.Get(999)
 	if !errors.Is(err, track.ErrNotFound) {
-		t.Fatalf("Get: erro = %v, esperado ErrInvalid", err)
+		t.Fatalf("Get: erro = %v, esperado ErrNotFound", err)
 	}
 
 }
