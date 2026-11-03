@@ -1,12 +1,15 @@
 package memory
 
 import (
+	"context"
 	"fmt"
 	"sort"
 	"sync"
 
 	"github.com/guii55/music-library/internal/track"
 )
+
+var _ track.Repository = (*Store)(nil)
 
 type Store struct {
 	m      map[int64]track.Track
@@ -22,7 +25,7 @@ func NewStore() *Store {
 	}
 }
 
-func (s *Store) Create(t track.Track) (track.Track, error) {
+func (s *Store) Create(ctx context.Context, t track.Track) (track.Track, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	err := t.Validate()
@@ -35,7 +38,7 @@ func (s *Store) Create(t track.Track) (track.Track, error) {
 	return t, nil
 }
 
-func (s *Store) Get(id int64) (track.Track, error) {
+func (s *Store) Get(ctx context.Context, id int64) (track.Track, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	t, exists := s.m[id]
@@ -45,7 +48,7 @@ func (s *Store) Get(id int64) (track.Track, error) {
 	return t, nil
 }
 
-func (s *Store) List() []track.Track {
+func (s *Store) List(ctx context.Context) ([]track.Track, error) {
 	s.mu.RLock()
 	defer s.mu.RUnlock()
 	tracks := make([]track.Track, 0, len(s.m))
@@ -55,10 +58,10 @@ func (s *Store) List() []track.Track {
 	sort.Slice(tracks, func(i, j int) bool {
 		return tracks[i].ID < tracks[j].ID
 	})
-	return tracks
+	return tracks, nil
 }
 
-func (s *Store) Update(t track.Track) (track.Track, error) {
+func (s *Store) Update(ctx context.Context, t track.Track) (track.Track, error) {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	err := t.Validate()
@@ -73,7 +76,7 @@ func (s *Store) Update(t track.Track) (track.Track, error) {
 	return t, nil
 }
 
-func (s *Store) Delete(id int64) error {
+func (s *Store) Delete(ctx context.Context, id int64) error {
 	s.mu.Lock()
 	defer s.mu.Unlock()
 	_, exists := s.m[id]

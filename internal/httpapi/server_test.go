@@ -1,6 +1,7 @@
 package httpapi
 
 import (
+	"context"
 	"encoding/json"
 	"errors"
 	"net/http"
@@ -49,7 +50,7 @@ func TestCreateTrack(t *testing.T) {
 func TestListTracks(t *testing.T) {
 	store := memory.NewStore()
 	server := NewServer(store)
-	track1, err := store.Create(track.Track{Title: "Song 1", Artist: "Artist 1", Year: 2023, Rating: 4})
+	track1, err := store.Create(context.Background(), track.Track{Title: "Song 1", Artist: "Artist 1", Year: 2023, Rating: 4})
 	if err != nil {
 		t.Fatalf("erro ao criar track 1: %v", err)
 	}
@@ -73,7 +74,7 @@ func TestListTracks(t *testing.T) {
 func TestGetTrack(t *testing.T) {
 	store := memory.NewStore()
 	server := NewServer(store)
-	track1, err := store.Create(track.Track{Title: "Song 1", Artist: "Artist 1", Year: 2023, Rating: 4})
+	track1, err := store.Create(context.Background(), track.Track{Title: "Song 1", Artist: "Artist 1", Year: 2023, Rating: 4})
 	if err != nil {
 		t.Fatalf("erro ao criar track 1: %v", err)
 	}
@@ -97,7 +98,7 @@ func TestGetTrack(t *testing.T) {
 func TestUpdateTrack(t *testing.T) {
 	store := memory.NewStore()
 	server := NewServer(store)
-	track1, err := store.Create(track.Track{Title: "Song 1", Artist: "Artist 1", Year: 2023, Rating: 4})
+	track1, err := store.Create(context.Background(), track.Track{Title: "Song 1", Artist: "Artist 1", Year: 2023, Rating: 4})
 	if err != nil {
 		t.Fatalf("erro ao criar track 1: %v", err)
 	}
@@ -121,7 +122,7 @@ func TestUpdateTrack(t *testing.T) {
 func TestDeleteTrack(t *testing.T) {
 	store := memory.NewStore()
 	server := NewServer(store)
-	track1, err := store.Create(track.Track{Title: "Song 1", Artist: "Artist 1", Year: 2023, Rating: 4})
+	track1, err := store.Create(context.Background(), track.Track{Title: "Song 1", Artist: "Artist 1", Year: 2023, Rating: 4})
 	if err != nil {
 		t.Fatalf("erro ao criar track 1: %v", err)
 	}
@@ -132,7 +133,7 @@ func TestDeleteTrack(t *testing.T) {
 		t.Fatalf("status = %d, esperado %d", rec.Code, http.StatusNoContent)
 	}
 
-	_, err = store.Get(track1.ID)
+	_, err = store.Get(context.Background(), track1.ID)
 	if !errors.Is(err, track.ErrNotFound) {
 		t.Fatalf("track com ID %d não foi deletada", track1.ID)
 	}

@@ -5,15 +5,14 @@ import (
 	"net/http"
 	"strconv"
 
-	"github.com/guii55/music-library/internal/storage/memory"
 	"github.com/guii55/music-library/internal/track"
 )
 
 type Server struct {
-	store *memory.Store
+	store track.Repository
 }
 
-func NewServer(store *memory.Store) *Server {
+func NewServer(store track.Repository) *Server {
 	return &Server{store: store}
 }
 
@@ -47,7 +46,7 @@ func (s *Server) HandlerCreateTrack(w http.ResponseWriter, r *http.Request) {
 		WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid request body"})
 		return
 	}
-	newTrack, err := s.store.Create(t)
+	newTrack, err := s.store.Create(r.Context(), t)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -57,7 +56,11 @@ func (s *Server) HandlerCreateTrack(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) HandlerListTracks(w http.ResponseWriter, r *http.Request) {
-	tracks := s.store.List()
+	tracks, err := s.store.List(r.Context())
+	if err != nil {
+		WriteError(w, err)
+		return
+	}
 	WriteJSON(w, http.StatusOK, tracks)
 }
 
@@ -69,7 +72,7 @@ func (s *Server) HandlerGetTrack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	t, err := s.store.Get(id)
+	t, err := s.store.Get(r.Context(), id)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -93,7 +96,7 @@ func (s *Server) HandlerUpdateTrack(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	t.ID = id
-	updated, err := s.store.Update(t)
+	updated, err := s.store.Update(r.Context(), t)
 	if err != nil {
 		WriteError(w, err)
 		return
@@ -108,7 +111,7 @@ func (s *Server) HandlerDeleteTrack(w http.ResponseWriter, r *http.Request) {
 		WriteJSON(w, http.StatusBadRequest, map[string]string{"error": "invalid track ID"})
 		return
 	}
-	erro := s.store.Delete(id)
+	erro := s.store.Delete(r.Context(), id)
 	if erro != nil {
 		WriteError(w, erro)
 		return
