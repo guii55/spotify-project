@@ -5,6 +5,7 @@ import (
 	"fmt"
 	"sort"
 	"sync"
+	"time"
 
 	"github.com/guii55/music-library/internal/track"
 )
@@ -32,6 +33,7 @@ func (s *Store) Create(ctx context.Context, t track.Track) (track.Track, error) 
 	if err != nil {
 		return track.Track{}, fmt.Errorf("create: %w", err)
 	}
+	t.CreatedAt = time.Now()
 	t.ID = s.nextID
 	s.m[s.nextID] = t
 	s.nextID++

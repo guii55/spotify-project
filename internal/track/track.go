@@ -6,12 +6,13 @@ import (
 )
 
 type Track struct {
-	ID     int64  `json:"id"` //atribuido pelo storage, zero antes de salvar
-	Title  string `json:"title"`
-	Artist string `json:"artist"`
-	Album  string `json:"album"`
-	Year   int    `json:"year"`
-	Rating int    `json:"rating"` //0 = sem nota; 1 a 5
+	ID        int64     `json:"id"` //atribuido pelo storage, zero antes de salvar
+	Title     string    `json:"title"`
+	Artist    string    `json:"artist"`
+	Album     string    `json:"album"`
+	Year      int       `json:"year"`
+	Rating    int       `json:"rating"`     //0 = sem nota; 1 a 5
+	CreatedAt time.Time `json:"created_at"` //atribuido pelo storage, zero antes de salvar
 }
 
 func (t Track) Validate() error {
