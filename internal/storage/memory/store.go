@@ -70,10 +70,11 @@ func (s *Store) Update(ctx context.Context, t track.Track) (track.Track, error) 
 	if err != nil {
 		return track.Track{}, fmt.Errorf("update: %w", err)
 	}
-	_, exists := s.m[t.ID]
+	existing, exists := s.m[t.ID]
 	if !exists {
 		return track.Track{}, fmt.Errorf("update: %w: %d", track.ErrNotFound, t.ID)
 	}
+	t.CreatedAt = existing.CreatedAt
 	s.m[t.ID] = t
 	return t, nil
 }

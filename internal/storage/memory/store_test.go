@@ -118,6 +118,33 @@ func TestUpdate(t *testing.T) {
 	}
 
 }
+func TestUpdatePreservesCreatedAt(t *testing.T) {
+	s := NewStore()
+	created, erro := s.Create(context.Background(), validTrack(t))
+	if erro != nil {
+		t.Fatalf("Create: erro inesperado %v", erro)
+	}
+
+	input := validTrack(t)
+	input.ID = created.ID
+	input.Title = "Updated Title"
+
+	updated, err := s.Update(context.Background(), input)
+	if err != nil {
+		t.Fatalf("Update: erro inesperado: %v", err)
+	}
+	if !updated.CreatedAt.Equal(created.CreatedAt) {
+		t.Errorf("CreatedAt = %v, erro esperado %v", updated.CreatedAt, created.CreatedAt)
+	}
+	stored, err := s.Get(context.Background(), created.ID)
+	if err != nil {
+		t.Fatalf("Get: erro inesperado: %v", err)
+	}
+	if !stored.CreatedAt.Equal(created.CreatedAt) {
+		t.Errorf("CreatedAt salvo = %v, esperado %v", stored.CreatedAt, created.CreatedAt)
+	}
+
+}
 
 func TestUpdateNotFound(t *testing.T) {
 
