@@ -32,10 +32,14 @@ func main() {
 		}
 
 		store = postgres.New(db)
+		log.Println("o storage é Postgres")
+	} else {
+		log.Println("o storage esta em memoria, irao sumir ao reiniciar")
 	}
 	srv := httpapi.NewServer(store)
 	port := os.Getenv("PORT")
 	if port == "" {
+
 		port = "8080"
 	}
 
@@ -44,5 +48,6 @@ func main() {
 		Handler:           srv.Handler(),
 		ReadHeaderTimeout: 5 * time.Second,
 	}
+	log.Printf("ouvindo na porta: %v", port)
 	log.Fatal(server.ListenAndServe())
 }
