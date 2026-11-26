@@ -96,3 +96,66 @@ func TestDelete(t *testing.T) {
 	}
 
 }
+
+func TestUpdate(t *testing.T) {
+	store := newTestStore(t)
+	ctx := context.Background()
+
+	// 1. CRIAR, momento em que a track é criada.
+	created, err := store.Create(ctx, track.Track{
+		Title:  "Paranoid Android",
+		Artist: "Radiohead",
+		Album:  "OK Computer",
+		Year:   1997,
+		Rating: 5,
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	// 2. PREPARAR, oque voce quer gravar (o updated)
+	want := created
+	want.Title = "Karma Police"
+	want.Rating = 4
+	//3. ATUALIZAR, mandando o want
+	updated, err := store.Update(ctx, want)
+	if err != nil {
+		t.Fatalf("Update: %v", err)
+	}
+	// 4. CONFERIR oque o update devolveu, contrao want
+	if !updated.CreatedAt.Equal(want.CreatedAt) {
+		t.Errorf("Update = %v, esperado %v", updated.CreatedAt, want.CreatedAt)
+	}
+	updated.CreatedAt = want.CreatedAt
+	if updated != want {
+		t.Errorf("Update = %+v, esperado %+v", updated, want)
+	}
+	//5. BUSCAR no banco, o got vai entrar aqui
+	got, err := store.Get(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("Get: %v", err)
+	}
+
+	//6. CONFERIR oque esta gravado, contra o want
+	if !got.CreatedAt.Equal(want.CreatedAt) {
+		t.Errorf("Get = %v, esperado %v", got.CreatedAt, want.CreatedAt)
+	}
+	got.CreatedAt = want.CreatedAt
+	if got != want {
+		t.Errorf("Get = %+v, esperado %+v", got, want)
+	}
+
+}
+
+func TestUpdateNotFound(t *testing.T) {
+	store := newTestStore(t)
+	ctx := context.Background()
+	_, err := store.Update(ctx, track.Track{
+		ID:     999,
+		Title:  "Karma Police",
+		Artist: "Radiohead",
+	})
+	if !errors.Is(err, track.ErrNotFound) {
+		t.Errorf("Update(999) erro = %v, esperado ErrNotFound", err)
+	}
+}
