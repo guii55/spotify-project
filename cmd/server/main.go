@@ -34,7 +34,7 @@ func main() {
 		store = postgres.New(db)
 		log.Println("o storage é Postgres")
 	} else {
-		log.Println("o storage esta em memoria, irao sumir ao reiniciar")
+		log.Println("o storage esta em memoria, irao sumir dados ao reiniciar")
 	}
 	srv := httpapi.NewServer(store)
 	port := os.Getenv("PORT")

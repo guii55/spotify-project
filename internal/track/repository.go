@@ -1,6 +1,8 @@
 package track
 
-import "context"
+import (
+	"context"
+)
 
 // Repository defines track storage operations.
 // Implementations must return ErrNotFound when an ID does not exist.

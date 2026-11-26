@@ -3,6 +3,7 @@ package postgres
 import (
 	"context"
 	"database/sql"
+	"errors"
 	"os"
 	"testing"
 
@@ -58,4 +59,40 @@ func TestCreateAndGet(t *testing.T) {
 	if got != created {
 		t.Errorf("Get = %+v, esperado %+v", got, created)
 	}
+}
+
+func TestGetNotFound(t *testing.T) {
+	store := newTestStore(t)
+	ctx := context.Background()
+	_, err := store.Get(ctx, 999)
+	if !errors.Is(err, track.ErrNotFound) {
+		t.Errorf("Get(999) erro = %v, esperado ErrNotFound", err)
+
+	}
+}
+
+func TestDelete(t *testing.T) {
+	store := newTestStore(t)
+	ctx := context.Background()
+	created, err := store.Create(ctx, track.Track{
+		Title:  "Paranoid Android",
+		Artist: "Radiohead",
+	})
+	if err != nil {
+		t.Fatalf("Create: %v", err)
+	}
+
+	err = store.Delete(ctx, created.ID)
+	if err != nil {
+		t.Fatalf("Delete: %v", err)
+	}
+	_, err = store.Get(ctx, created.ID)
+	if !errors.Is(err, track.ErrNotFound) {
+		t.Errorf("Get(id) erro = %v, esperado ErrNotFound", err)
+	}
+	err = store.Delete(ctx, created.ID)
+	if !errors.Is(err, track.ErrNotFound) {
+		t.Errorf("Delete repetido erro = %v, esperado ErrNotFound", err)
+	}
+
 }
