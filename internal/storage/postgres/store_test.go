@@ -159,3 +159,59 @@ func TestUpdateNotFound(t *testing.T) {
 		t.Errorf("Update(999) erro = %v, esperado ErrNotFound", err)
 	}
 }
+
+func TestListEmpty(t *testing.T) {
+	store := newTestStore(t)
+	ctx := context.Background()
+
+	tracks, err := store.List(ctx)
+	if err != nil {
+		t.Fatalf("list: %v", err)
+	}
+	if tracks == nil {
+		t.Error("List devolveu nil, esperado slice vazia")
+	}
+	if len(tracks) != 0 {
+		t.Errorf("List devolveu %d tracks, esperado 0", len(tracks))
+	}
+}
+func TestList(t *testing.T) {
+	store := newTestStore(t)
+	ctx := context.Background()
+
+	// 1. Criar tracks
+	first, err := store.Create(ctx, track.Track{
+		Title:  "Paranoid Android",
+		Artist: "Radiohead",
+	})
+	if err != nil {
+		t.Fatalf("Create first: %v", err)
+	}
+	second, err := store.Create(ctx, track.Track{
+		Title:  "Creep",
+		Artist: "Radiohead",
+	})
+	if err != nil {
+		t.Fatalf("Create second: %v", err)
+	}
+	//2. Listar
+	tracks, err := store.List(ctx)
+	if err != nil {
+		t.Fatalf("List: %v", err)
+	}
+
+	//3. Conferir o tamanho
+	if len(tracks) != 2 {
+		t.Fatalf("List devolveu %d tracks, esperado 2", len(tracks))
+	}
+
+	//4. Conferir a ordem:
+
+	if tracks[0].ID != first.ID {
+		t.Errorf("tracks[0].ID = %d, esperado %d", tracks[0].ID, first.ID)
+	}
+
+	if tracks[1].ID != second.ID {
+		t.Errorf("tracks[1].ID = %d, esperado %d", tracks[1].ID, second.ID)
+	}
+}
